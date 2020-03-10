@@ -1,3 +1,5 @@
+# Running sample 
+# bash ForgeBSGenome.sh  BSgenome_seed/BSgenome.Zmays.maizegdb_sm.AGPv5-seed
 
  Rscript ForgeBSGenome.R $1 
 
