@@ -8,12 +8,13 @@ The BSGenome R packges output of this initial parte are available at [EGlab BSGe
 
 ### Notes Package forging 
 
-There are some important general and specific notes for the BSgenome package: 
+There are some important general and specific notes for the BSgenome packages forged here: 
  - All the package are built using soft masking genome versions, for B73 AGPv3 and AGPv4 are downloaded versions from [Gramene](http://www.gramene.org/). For AGPv5 and Mo17 the soft masking versions of each genome was produced locally using RepeatMasker v 4.1.0 with the next parameters: 
  
  `RpeatMasker -pa 8 -gff -xsmall -species maize -norna -s <Genomes.fa>`  
  
- - 
+ - Mo17 and AGPv5 genomes lacks mitochondrial and plastd genomes in the BSgenome packge forged here, that's why in the BSgenome description you won't find the section 
+ `circ_seqs: c("Mt","Pt")`
  
 
 
