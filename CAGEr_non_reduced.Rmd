@@ -1,0 +1,109 @@
+---
+title: "CAGEr hybrid cis-trans"
+author: "Aimer"
+date: "3/2/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Required packages and local functions 
+```{r}
+# BiocManager::install(c("ggplot2","ggfortify","CAGEr","reshape2","devtools","ggbiplot","ggrepel","Hmisc","SummarizedExperiment","FactoMineR","factoextra","pheatmap","plyr","ggpmisc","ggpubr","UpSetR","gtools","edgeR"))
+suppressMessages(library(ggplot2))
+suppressMessages(library(ggfortify))
+suppressMessages(library(CAGEr))
+suppressMessages(library(reshape2))
+suppressMessages(library(devtools))
+suppressMessages(library(ggbiplot))
+suppressMessages(library(ggrepel))
+suppressMessages(library(Hmisc))
+suppressMessages(library(SummarizedExperiment))
+suppressMessages(library(FactoMineR))
+suppressMessages(library(factoextra))
+suppressMessages(library(pheatmap))
+suppressMessages(library(plyr))
+suppressMessages(library(ggpmisc))
+suppressMessages(library(ggpubr))
+suppressMessages(library(UpSetR))
+suppressMessages(library(gtools))
+suppressMessages(library(edgeR))
+```
+
+The present code will use bam alignments to produce raw ctss and bigwig normalize files. This code will first generate the Bigwig files for AGPv4 mapping, then for Mo17.
+
+```{r}
+dir <- "/maindisk/aimer/CAGE_CIS-TRANS/Results/" 
+#setwd( dir   ) 
+
+
+Genome <- "AGPv4_SM"   
+suppressMessages(library("BSgenome.Zmays.EnsembleSM.AGPv4r40"))
+Genome_File  <- "BSgenome.Zmays.EnsembleSM.AGPv4r40"  
+current_files <- list.files(paste("/maindisk/aimer/CAGE_CIS-TRANS/Results/",Genome, "/Bowtie/Bam/Single_mapping", sep = "" ), full.names = TRUE, pattern="*\\.bam$")      
+
+# Pattern for syntetic hybrids :  pattern=".*is.*bam$"  
+# Pattern for Maike's Data : pattern=".*B73_[HV].*bam$"
+# Pattern for root or only shoot samples : pattern=".*[73]_r[co].*r[0-9]_.*bam$" 
+
+print("Test BSgenome packages  ")
+B73 <- BSgenome.Zmays.EnsembleSM.AGPv4r40
+B73$B73V4_ctg10
+
+Dataset <- paste(Genome, sub("_tmm_uq.bam","",basename(current_files)), sep = ".")
+
+CAGEobject <- new("CAGEset", genomeName = Genome_File,
+                    inputFiles = current_files, inputFilesType = "bam" ,
+                    sampleLabels = Dataset)
+getCTSS(CAGEobject)
+ctss <- CTSStagCount(CAGEobject )
+head(ctss)
+```
+This section is the most time consuming part of the code 
+
+```{r}
+plotReverseCumulatives(CAGEobject, values = "raw", onePlot = TRUE )
+normalizeTagCount(CAGEobject, method = "simpleTpm")
+plotReverseCumulatives(CAGEobject, values = "normalized", onePlot = TRUE )
+
+exportCTSStoBedGraph(CAGEobject, values = "normalized", format = "BigWig", oneFile = F )
+
+#plotCorrelation(CAGEobject, values = "normalized", tagCountThreshold = 5,
+ #                 samples = "all", method = "pearson",applyThresholdBoth = T)
+
+save.image(paste( "~/CAGEcodes/CAGEr_non_reduced_",Genome, "_all_load.RData", sep="" ) ) 
+# load("~/CAGEcodes/CAGEr_non_reduced_Mo17_all_load.RData") 
+``` 
+
+ Filtering out low quality reads...
+ Removing the first base of the reads if 'G' and not aligned to the genome...
+ Estimating the frequency of adding a 'G' nucleotide and correcting the systematic bias...
+ Making CTSSs and counting number of tags...
+
+```{r}
+ Genome <- "Mo17_SM"
+#  suppressMessages(library("BSgenome.Zmays.ncbiSM.Mo17"))
+#  Genome_File  <- "BSgenome.Zmays.ncbiSM.Mo17"
+#current_files <- list.files(paste("/maindisk/aimer/CAGE_CIS-TRANS/Results/",Genome, "/Bowtie/Bam/Single_mapping", sep = "" ), full.names = TRUE, pattern="*\\.bam$")   
+
+#Dataset <- paste(Genome, sub("_tmm_uq.bam","",basename(current_files)), sep = ".")
+
+#CAGEobject <- new("CAGEset", genomeName = Genome_File,
+ #                   inputFiles = current_files, inputFilesType = "bam" ,
+  #                  sampleLabels = Dataset)
+#getCTSS(CAGEobject)
+#ctss <- CTSStagCount(CAGEobject )
+#plotReverseCumulatives(CAGEobject, values = "raw", onePlot = TRUE )
+#normalizeTagCount(CAGEobject, method = "simpleTpm")
+#plotReverseCumulatives(CAGEobject, values = "normalized", onePlot = TRUE )
+
+#exportCTSStoBedGraph(CAGEobject, values = "normalized", format = "BigWig", oneFile = F )
+
+#plotCorrelation(CAGEobject, values = "normalized", tagCountThreshold = 5,
+ #                 samples = "all", method = "pearson",applyThresholdBoth = T)
+
+#save.image(paste( "~/CAGEcodes/CAGEr_non_reduced_",Genome, "_all_load.RData", sep="" ) ) 
+```
